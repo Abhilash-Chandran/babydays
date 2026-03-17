@@ -61,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           SizedBox(
-            height: 120,
+            height: 130,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
