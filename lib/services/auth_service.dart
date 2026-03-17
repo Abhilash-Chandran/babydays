@@ -105,9 +105,22 @@ class AuthService extends ChangeNotifier {
           email: email,
           password: password,
         );
-        await _user!.linkWithCredential(credential);
-        _user = _auth.currentUser;
-        notifyListeners();
+        try {
+          await _user!.linkWithCredential(credential);
+          _user = _auth.currentUser;
+          notifyListeners();
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'email-already-in-use' ||
+              e.code == 'credential-already-in-use') {
+            // Account exists — sign in instead.
+            await _auth.signInWithEmailAndPassword(
+              email: email,
+              password: password,
+            );
+          } else {
+            rethrow;
+          }
+        }
       } else {
         await _auth.createUserWithEmailAndPassword(
           email: email,
@@ -149,7 +162,10 @@ class AuthService extends ChangeNotifier {
         notifyListeners();
         return;
       } on FirebaseAuthException catch (e) {
-        if (e.code != 'credential-already-in-use') rethrow;
+        if (e.code != 'credential-already-in-use' &&
+            e.code != 'email-already-in-use') {
+          rethrow;
+        }
         // Credential belongs to an existing account — sign in there instead.
       }
     }

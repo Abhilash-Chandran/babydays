@@ -71,7 +71,7 @@ void main() async {
   );
 }
 
-class BabyDaysApp extends StatelessWidget {
+class BabyDaysApp extends StatefulWidget {
   final StorageService localStorage;
   final FirestoreStorageService? firestoreStorage;
   final AuthService? authService;
@@ -86,15 +86,47 @@ class BabyDaysApp extends StatelessWidget {
   });
 
   @override
+  State<BabyDaysApp> createState() => _BabyDaysAppState();
+}
+
+class _BabyDaysAppState extends State<BabyDaysApp> {
+  late final ActivityProvider _activityProvider;
+  String? _lastUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    _activityProvider = ActivityProvider(
+      widget.firestoreStorage ?? widget.localStorage,
+    );
+    _lastUserId = widget.authService?.userId;
+    widget.authService?.addListener(_onAuthChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.authService?.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    final newUserId = widget.authService?.userId;
+    if (newUserId != null && newUserId != _lastUserId) {
+      _lastUserId = newUserId;
+      // UID changed — point storage at the new user's Firestore collection.
+      final newStorage = FirestoreStorageService(userId: newUserId);
+      _activityProvider.swapStorage(newStorage);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => ActivityProvider(firestoreStorage ?? localStorage),
-        ),
-        ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
-        if (authService != null)
-          ChangeNotifierProvider.value(value: authService!),
+        ChangeNotifierProvider.value(value: _activityProvider),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(widget.prefs)),
+        if (widget.authService != null)
+          ChangeNotifierProvider.value(value: widget.authService!),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
