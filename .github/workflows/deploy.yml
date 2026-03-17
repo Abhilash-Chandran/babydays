@@ -21,6 +21,11 @@ jobs:
 
             - run: dart pub global activate peanut
 
+            - name: Configure git
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+
             - run: dart pub global run peanut
 
             - name: Push to gh-pages
