@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/activity.dart';
-import '../services/storage_service.dart';
+import '../services/activity_storage_service.dart';
 import '../theme/app_theme.dart';
 
 /// Screen showing a multi-day 24-hour timeline grid — one row per day,
 /// with all activity types shown as colored blocks across a 0–23h axis.
 class MultiDayTimelineScreen extends StatefulWidget {
-  final StorageService storage;
+  final ActivityStorageService storage;
 
   const MultiDayTimelineScreen({super.key, required this.storage});
 

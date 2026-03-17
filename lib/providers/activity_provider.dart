@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/activity.dart';
-import '../services/storage_service.dart';
+import '../services/activity_storage_service.dart';
 
 /// ChangeNotifier holding the current day's activities.
 class ActivityProvider extends ChangeNotifier {
-  final StorageService _storage;
+  ActivityStorageService _storage;
   final Uuid _uuid = const Uuid();
 
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
   List<Activity> _activities = [];
   bool _isLoading = false;
 
-  ActivityProvider(this._storage);
+  ActivityProvider(this._storage)
+      : _selectedDate = _dateOnly(DateTime.now());
 
-  StorageService get storage => _storage;
+  static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  /// Swap the underlying storage (e.g. from local to Firestore).
+  Future<void> swapStorage(ActivityStorageService newStorage) async {
+    _storage = newStorage;
+    await loadActivities();
+  }
+
+  ActivityStorageService get storage => _storage;
   DateTime get selectedDate => _selectedDate;
   List<Activity> get activities => List.unmodifiable(_activities);
   bool get isLoading => _isLoading;
-
-  /// Normalise to date-only.
-  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
   /// Change the selected date and reload.
   Future<void> selectDate(DateTime date) async {
@@ -32,7 +38,12 @@ class ActivityProvider extends ChangeNotifier {
   Future<void> loadActivities() async {
     _isLoading = true;
     notifyListeners();
-    _activities = await _storage.getActivitiesForDate(_selectedDate);
+    try {
+      _activities = await _storage.getActivitiesForDate(_selectedDate);
+    } catch (e) {
+      debugPrint('Failed to load activities: $e');
+      _activities = [];
+    }
     _isLoading = false;
     notifyListeners();
   }

@@ -1,9 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/activity.dart';
+import 'activity_storage_service.dart';
 
 /// Provides persistence for baby activity data using shared_preferences,
 /// which maps to localStorage on web and SharedPreferences on mobile.
-class StorageService {
+class StorageService implements ActivityStorageService {
   static const String _activitiesKeyPrefix = 'activities_';
   static const String _allDatesKey = 'tracked_dates';
 
@@ -22,6 +23,7 @@ class StorageService {
   }
 
   /// Get all activities for a specific date, sorted by start time.
+  @override
   Future<List<Activity>> getActivitiesForDate(DateTime date) async {
     final key = _keyForDate(date);
     final jsonString = _prefs.getString(key);
@@ -32,6 +34,7 @@ class StorageService {
   }
 
   /// Save a new activity.
+  @override
   Future<void> addActivity(Activity activity) async {
     final activities = await getActivitiesForDate(activity.date);
     activities.add(activity);
@@ -40,6 +43,7 @@ class StorageService {
   }
 
   /// Update an existing activity (matched by id).
+  @override
   Future<void> updateActivity(Activity activity) async {
     final activities = await getActivitiesForDate(activity.date);
     final index = activities.indexWhere((a) => a.id == activity.id);
@@ -50,6 +54,7 @@ class StorageService {
   }
 
   /// Delete an activity by id for a given date.
+  @override
   Future<void> deleteActivity(String id, DateTime date) async {
     final activities = await getActivitiesForDate(date);
     activities.removeWhere((a) => a.id == id);
@@ -57,7 +62,8 @@ class StorageService {
   }
 
   /// Get a list of all dates that have tracked activities.
-  List<DateTime> getTrackedDates() {
+  @override
+  Future<List<DateTime>> getTrackedDates() async {
     final dateStrings = _prefs.getStringList(_allDatesKey) ?? [];
     return dateStrings.map((s) {
       final parts = s.split('-');
