@@ -137,13 +137,13 @@ class _CupertinoToolbar extends StatelessWidget {
         children: [
           CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: const Text('Cancel'),
             onPressed: onCancel,
+            child: const Text('Cancel'),
           ),
           CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: const Text('Done'),
             onPressed: onDone,
+            child: const Text('Done'),
           ),
         ],
       ),
