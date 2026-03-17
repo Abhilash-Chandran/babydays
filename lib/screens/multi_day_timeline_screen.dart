@@ -340,6 +340,6 @@ class _DayRow extends StatelessWidget {
     final date = DateTime(d.year, d.month, d.day);
     if (date == today) return 'Today';
     if (date == today.subtract(const Duration(days: 1))) return 'Yest.';
-    return DateFormat('E d/M').format(d);
+    return DateFormat('E d/M/yy').format(d);
   }
 }
