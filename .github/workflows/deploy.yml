@@ -1,0 +1,27 @@
+name: Deploy to GitHub Pages
+
+on:
+    push:
+        branches: [main]
+
+permissions:
+    contents: write
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: subosito/flutter-action@v2
+              with:
+                  channel: stable
+
+            - run: flutter pub get
+
+            - run: dart pub global activate peanut
+
+            - run: dart pub global run peanut
+
+            - name: Push to gh-pages
+              run: git push origin gh-pages
