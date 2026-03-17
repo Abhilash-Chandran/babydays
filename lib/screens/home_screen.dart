@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/activity.dart';
 import '../providers/activity_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/adaptive_pickers.dart';
 import '../widgets/day_timeline_bar.dart';
 import 'add_activity_sheet.dart';
 
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _pickDate(BuildContext context) async {
     final provider = context.read<ActivityProvider>();
-    final picked = await showDatePicker(
+    final picked = await showAdaptiveDatePicker(
       context: context,
       initialDate: provider.selectedDate,
       firstDate: DateTime(2020),

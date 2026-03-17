@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/activity.dart';
 import '../providers/activity_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/adaptive_pickers.dart';
 import 'breast_feeding_sheet.dart';
 
 /// Bottom-sheet for adding or editing an activity.
@@ -65,7 +66,7 @@ class _AddActivitySheetState extends State<AddActivitySheet> {
 
   Future<void> _pickTime({required bool isStart}) async {
     final initial = isStart ? _startTime : (_endTime ?? _startTime);
-    final picked = await showTimePicker(
+    final picked = await showAdaptiveTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(initial),
     );

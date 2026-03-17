@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/activity.dart';
 import '../theme/app_theme.dart';
+import '../widgets/adaptive_pickers.dart';
 
 /// Bottom-sheet for entering left/right breast feeding side details.
 class BreastFeedingSheet extends StatefulWidget {
@@ -58,7 +59,7 @@ class _BreastFeedingSheetState extends State<BreastFeedingSheet> {
     final initial = isStart
         ? entry.startTime
         : (entry.endTime ?? entry.startTime);
-    final picked = await showTimePicker(
+    final picked = await showAdaptiveTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(initial),
     );
