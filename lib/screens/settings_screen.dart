@@ -132,9 +132,11 @@ class _PaletteCard extends StatelessWidget {
             width: selected ? 2.5 : 1,
           ),
         ),
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
+        clipBehavior: Clip.hardEdge,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Color swatches row
             Row(
@@ -145,7 +147,7 @@ class _PaletteCard extends StatelessWidget {
                 _dot(data.formulaLight),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -154,7 +156,7 @@ class _PaletteCard extends StatelessWidget {
                 _dot(data.lightBg),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               palette.label,
               style: theme.textTheme.labelSmall?.copyWith(
@@ -168,7 +170,7 @@ class _PaletteCard extends StatelessWidget {
             if (selected)
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Icon(Icons.check_circle, size: 16, color: data.primary),
+                child: Icon(Icons.check_circle, size: 14, color: data.primary),
               ),
           ],
         ),
