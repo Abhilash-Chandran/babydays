@@ -41,9 +41,7 @@ void main() async {
           final dates = await localStorage.getTrackedDates();
           final allActivities = <Activity>[];
           for (final date in dates) {
-            allActivities.addAll(
-              await localStorage.getActivitiesForDate(date),
-            );
+            allActivities.addAll(await localStorage.getActivitiesForDate(date));
           }
           if (allActivities.isNotEmpty) {
             try {

@@ -41,7 +41,9 @@ class FirestoreStorageService implements ActivityStorageService {
         .where('date', isEqualTo: _dateStr(date))
         .get()
         .timeout(_timeout);
-    final activities = snap.docs.map((doc) => Activity.fromJson(doc.data())).toList();
+    final activities = snap.docs
+        .map((doc) => Activity.fromJson(doc.data()))
+        .toList();
     activities.sort((a, b) => a.startTime.compareTo(b.startTime));
     return activities;
   }
@@ -49,13 +51,19 @@ class FirestoreStorageService implements ActivityStorageService {
   /// Save a new activity.
   @override
   Future<void> addActivity(Activity activity) async {
-    await _activitiesRef.doc(activity.id).set(activity.toJson()).timeout(_timeout);
+    await _activitiesRef
+        .doc(activity.id)
+        .set(activity.toJson())
+        .timeout(_timeout);
   }
 
   /// Update an existing activity (matched by id).
   @override
   Future<void> updateActivity(Activity activity) async {
-    await _activitiesRef.doc(activity.id).update(activity.toJson()).timeout(_timeout);
+    await _activitiesRef
+        .doc(activity.id)
+        .update(activity.toJson())
+        .timeout(_timeout);
   }
 
   /// Delete an activity by id.

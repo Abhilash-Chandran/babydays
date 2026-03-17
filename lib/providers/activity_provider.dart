@@ -12,8 +12,7 @@ class ActivityProvider extends ChangeNotifier {
   List<Activity> _activities = [];
   bool _isLoading = false;
 
-  ActivityProvider(this._storage)
-      : _selectedDate = _dateOnly(DateTime.now());
+  ActivityProvider(this._storage) : _selectedDate = _dateOnly(DateTime.now());
 
   static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
