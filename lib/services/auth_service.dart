@@ -10,9 +10,12 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 /// Manages Firebase Authentication state.
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth;
+  final String? _googleClientId;
   User? _user;
 
-  AuthService({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance {
+  AuthService({FirebaseAuth? auth, String? googleClientId})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _googleClientId = googleClientId {
     _user = _auth.currentUser;
     _auth.authStateChanges().listen((user) {
       _user = user;
@@ -35,9 +38,35 @@ class AuthService extends ChangeNotifier {
 
   // ── Google Sign-In ────────────────────────────────────────────────────────
 
+  bool _googleInitialized = false;
+
   Future<void> signInWithGoogle() async {
+    if (kIsWeb) {
+      // On web, use Firebase Auth's built-in Google popup.
+      final provider = GoogleAuthProvider();
+      if (_user != null && _user!.isAnonymous) {
+        try {
+          await _user!.linkWithPopup(provider);
+          _user = _auth.currentUser;
+          notifyListeners();
+          return;
+        } on FirebaseAuthException catch (e) {
+          if (e.code != 'credential-already-in-use' &&
+              e.code != 'email-already-in-use') {
+            rethrow;
+          }
+        }
+      }
+      await _auth.signInWithPopup(provider);
+      return;
+    }
+
+    // On mobile, use the google_sign_in package.
     final googleSignIn = GoogleSignIn.instance;
-    await googleSignIn.initialize();
+    if (!_googleInitialized) {
+      await googleSignIn.initialize(clientId: _googleClientId);
+      _googleInitialized = true;
+    }
     final googleUser = await googleSignIn.authenticate();
 
     final googleAuth = googleUser.authentication;
