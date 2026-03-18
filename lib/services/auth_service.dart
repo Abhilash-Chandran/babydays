@@ -174,9 +174,19 @@ class AuthService extends ChangeNotifier {
   // ── Sign out ──────────────────────────────────────────────────────────────
 
   Future<void> signOut() async {
-    await GoogleSignIn.instance.signOut();
+    if (!kIsWeb) {
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {
+        // Google sign-in may not have been used.
+      }
+    }
     await _auth.signOut();
-    await signInAnonymously();
+    _user = null;
+    // Sign in anonymously directly — bypass the signInAnonymously() guard.
+    final result = await _auth.signInAnonymously();
+    _user = result.user;
+    notifyListeners();
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
