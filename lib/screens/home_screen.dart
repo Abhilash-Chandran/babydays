@@ -98,7 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
-            builder: (_) => const AddActivitySheet(),
+            builder: (_) =>
+                AddActivitySheet(initialDate: provider.selectedDate),
           );
         },
         child: const Icon(Icons.add, size: 28),
