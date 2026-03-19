@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/activity.dart';
+import '../providers/activity_provider.dart';
 import '../services/activity_storage_service.dart';
 import '../theme/app_theme.dart';
 
@@ -23,10 +25,29 @@ class _MultiDayTimelineScreenState extends State<MultiDayTimelineScreen> {
   /// date → activities, ordered newest-first.
   final List<_DayData> _days = [];
 
+  ActivityProvider? _activityProvider;
+
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final provider = context.read<ActivityProvider>();
+    if (_activityProvider != provider) {
+      _activityProvider?.removeListener(_loadData);
+      _activityProvider = provider;
+      _activityProvider!.addListener(_loadData);
+    }
+  }
+
+  @override
+  void dispose() {
+    _activityProvider?.removeListener(_loadData);
+    super.dispose();
   }
 
   Future<void> _loadData() async {
