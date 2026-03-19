@@ -54,7 +54,7 @@ class DayTimelineBar extends StatelessWidget {
                     const SizedBox(height: 2),
                     // ── Hour labels + now indicator ──
                     _buildHourLabels(
-                      totalWidth,
+                      totalWidth - _iconOffset,
                       labelColor,
                       nowLineColor,
                       context,
@@ -106,6 +106,8 @@ class DayTimelineBar extends StatelessWidget {
     );
   }
 
+  static const double _iconOffset = 18.0; // 14px icon + 4px spacing
+
   // ── One row per activity type with colored blocks ──────────────────────────
   Widget _buildActivityRows(
     double totalWidth,
@@ -143,65 +145,59 @@ class DayTimelineBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 1.5),
           child: SizedBox(
             height: 18,
-            child: Stack(
+            child: Row(
               children: [
-                // Track background
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: trackColor,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
+                // Type icon in front of the track
+                Icon(
+                  AppTheme.iconForActivity(type.name),
+                  size: 14,
+                  color: color,
                 ),
-                // Activity blocks
-                ...typeActivities.map((a) {
-                  final startFrac = _timeToFraction(a.startTime);
-                  final endFrac = a.endTime != null
-                      ? _timeToFraction(a.endTime!)
-                      : (startFrac + 0.01).clamp(
-                          0.0,
-                          1.0,
-                        ); // dot for instant events
-                  final left = startFrac * totalWidth;
-                  final width = ((endFrac - startFrac) * totalWidth).clamp(
-                    3.0,
-                    totalWidth,
-                  );
-                  return Positioned(
-                    left: left,
-                    width: width,
-                    top: 0,
-                    bottom: 0,
-                    child: Tooltip(
-                      message: _tooltipFor(a),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: color,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        alignment: Alignment.center,
-                        child: width >= 16
-                            ? Icon(
-                                AppTheme.iconForActivity(a.type.name),
-                                size: 12,
-                                color: Colors.white.withAlpha(220),
-                              )
-                            : null,
-                      ),
-                    ),
-                  );
-                }),
-                // Type icon at the start
-                Positioned(
-                  left: 2,
-                  top: 1,
-                  child: Icon(
-                    AppTheme.iconForActivity(type.name),
-                    size: 14,
-                    color: brightness == Brightness.light
-                        ? Colors.black45
-                        : Colors.white54,
+                const SizedBox(width: 4),
+                // Track + activity blocks
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final trackWidth = constraints.maxWidth;
+                      return Stack(
+                        children: [
+                          // Track background
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: trackColor,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                          // Activity blocks
+                          ...typeActivities.map((a) {
+                            final startFrac = _timeToFraction(a.startTime);
+                            final endFrac = a.endTime != null
+                                ? _timeToFraction(a.endTime!)
+                                : (startFrac + 0.01).clamp(0.0, 1.0);
+                            final left = startFrac * trackWidth;
+                            final width = ((endFrac - startFrac) * trackWidth)
+                                .clamp(3.0, trackWidth);
+                            return Positioned(
+                              left: left,
+                              width: width,
+                              top: 0,
+                              bottom: 0,
+                              child: Tooltip(
+                                message: _tooltipFor(a),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ],
@@ -222,48 +218,51 @@ class DayTimelineBar extends StatelessWidget {
     final now = DateTime.now();
     final nowFrac = (now.hour + now.minute / 60.0) / 24.0;
 
-    return SizedBox(
-      height: 20,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // ── Hour tick labels (every 3h) ──
-          for (int h = 0; h <= 24; h += 3)
+    return Padding(
+      padding: const EdgeInsets.only(left: _iconOffset),
+      child: SizedBox(
+        height: 20,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // ── Hour tick labels (every 3h) ──
+            for (int h = 0; h <= 24; h += 3)
+              Positioned(
+                left: (h / 24.0) * totalWidth - 8,
+                top: 2,
+                child: Text(
+                  h == 24 ? '' : h.toString().padLeft(2, '0'),
+                  style: TextStyle(fontSize: 9, color: labelColor),
+                ),
+              ),
+            // ── Now indicator ──
             Positioned(
-              left: (h / 24.0) * totalWidth - 8,
-              top: 2,
+              left: nowFrac * totalWidth - 0.5,
+              top: -20, // extends up into the track area
+              child: Container(
+                width: 2,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: nowLineColor.withAlpha(180),
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ),
+            // "Now" label
+            Positioned(
+              left: (nowFrac * totalWidth - 10).clamp(0, totalWidth - 24),
+              top: 9,
               child: Text(
-                h == 24 ? '' : h.toString().padLeft(2, '0'),
-                style: TextStyle(fontSize: 9, color: labelColor),
+                'now',
+                style: TextStyle(
+                  fontSize: 8,
+                  fontWeight: FontWeight.w700,
+                  color: nowLineColor.withAlpha(200),
+                ),
               ),
             ),
-          // ── Now indicator ──
-          Positioned(
-            left: nowFrac * totalWidth - 0.5,
-            top: -20, // extends up into the track area
-            child: Container(
-              width: 2,
-              height: 38,
-              decoration: BoxDecoration(
-                color: nowLineColor.withAlpha(180),
-                borderRadius: BorderRadius.circular(1),
-              ),
-            ),
-          ),
-          // "Now" label
-          Positioned(
-            left: (nowFrac * totalWidth - 10).clamp(0, totalWidth - 24),
-            top: 9,
-            child: Text(
-              'now',
-              style: TextStyle(
-                fontSize: 8,
-                fontWeight: FontWeight.w700,
-                color: nowLineColor.withAlpha(200),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
